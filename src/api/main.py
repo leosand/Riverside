@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.alerts.notify import notify_n8n
-from src.alerts.repository import list_open_alerts, save_alert
+from src.alerts.repository import acknowledge_alert, list_open_alerts, save_alert
 from src.alerts.thresholds import evaluate_ndvi
 from src.config import settings
 from src.db.session import get_engine
@@ -27,7 +27,7 @@ log = structlog.get_logger()
 
 app = FastAPI(
     title="Riverside API",
-    version="0.2.0",
+    version="0.3.0",
     description="Surveillance automatisée des berges — NDVI, alertes CSR. "
     "Automated shoreline monitoring.",
 )
@@ -168,9 +168,25 @@ def open_alerts(
 ) -> dict[str, Any]:
     """Alertes non acquittées / unacknowledged alerts (503 si DB indisponible)."""
     rows = list_open_alerts(get_engine(), aoi_id, limit)
-    # Sérialisation JSON des datetimes / JSON-safe serialization
-    for row in rows:
+    for row in rows:  # Sérialisation JSON / JSON-safe serialization
         for key, val in row.items():
             if hasattr(val, "isoformat"):
                 row[key] = val.isoformat()
     return {"count": len(rows), "alerts": rows}
+
+
+@app.post("/api/v1/alerts/{alert_id}/acknowledge")
+def acknowledge(alert_id: str) -> dict[str, Any]:
+    """Acquitte une alerte / acknowledge an alert (404 si introuvable)."""
+    if not acknowledge_alert(get_engine(), alert_id):
+        return JSONResponse(
+            status_code=404,
+            media_type="application/problem+json",
+            content=ProblemDetail(
+                title="Not Found",
+                status=404,
+                detail="Alerte introuvable ou déjà acquittée / alert not found or already acknowledged",
+            ).model_dump(),
+        )  # type: ignore[return-value]
+    log.info("alert_acknowledged", alert_id=alert_id)
+    return {"alert_id": alert_id, "acknowledged": True}

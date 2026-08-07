@@ -19,6 +19,7 @@ from sqlalchemy import (
     Table,
     func,
     select,
+    update,
 )
 from sqlalchemy.engine import Engine
 
@@ -72,3 +73,19 @@ def list_open_alerts(
         stmt = stmt.where(alerts_table.c.aoi_id == aoi_id)
     with engine.connect() as conn:
         return [dict(row._mapping) for row in conn.execute(stmt)]
+
+
+def acknowledge_alert(engine: Engine, alert_id: str) -> bool:
+    """Acquitte une alerte. False si introuvable ou déjà acquittée.
+
+    EN: Idempotent-safe acknowledge; returns False when nothing was updated.
+    """
+    stmt = (
+        update(alerts_table)
+        .where(alerts_table.c.id == alert_id)
+        .where(alerts_table.c.acknowledged.is_(False))
+        .values(acknowledged=True)
+    )
+    with engine.begin() as conn:
+        result = conn.execute(stmt)
+    return result.rowcount == 1
