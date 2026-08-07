@@ -31,3 +31,9 @@ jobs:
           cd web
           npm ci
           npx tsc --noEmit
+
+      - name: Frontend e2e (Playwright)
+        run: |
+          cd web
+          npx playwright install --with-deps chromium
+          npx playwright test

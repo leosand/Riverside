@@ -3,16 +3,18 @@
 ## Méthodologie
 
 - **Vérification** : le système est-il construit correctement ? (tests unitaires,
-  intégration, E2E, lint, schéma, compilation TypeScript)
+  intégration, E2E, lint, schéma, compilation TypeScript, tests navigateur)
 - **Validation** : construit-on le bon système ? (exactitude numérique des indices,
   comportement métier des alertes, parcours utilisateur complet)
 
 ## Matrice de traçabilité exigences → tests (statut RÉEL mesuré)
 
 Campagne d'exécution : 2026-08-07 — Python 3.12.10, pytest 9.1.1, ruff 0.16.1,
-TypeScript 5.5.3 / Next.js 14. Résultats réels : **34 tests exécutés, 34 passés,
-0 échoué** (dont 12 tests ajoutés en durcissement, étape 4), **5 erreurs de
-lint corrigées** (état final : 0), **0 échec initial** sur les 22 tests d'origine.
+TypeScript 5.5.3 / Next.js 14, Playwright 1.62.1.
+Résultats réels : **34 tests pytest passés / 0 échoué**, **3 tests Playwright
+frontend passés / 0 échoué**, **1 test STAC live passant** (réseau réel, hors
+CI), **5 erreurs de lint corrigées** (état final : 0), **0 échec initial** sur
+les 22 tests d'origine.
 
 | Exigence | Vérifiée par | Statut RÉEL |
 |---|---|---|
@@ -30,12 +32,17 @@ lint corrigées** (état final : 0), **0 échec initial** sur les 22 tests d'ori
 | Cycle API complet evaluate→open→ack→open vide | `tests/e2e/test_api_e2e.py` | ✅ PASS |
 | Compilation frontend TypeScript strict, zéro `any` | `npx tsc --noEmit` dans `web/` | ✅ PASS |
 | Lint Python (ruff) | `ruff check src tests` | ✅ PASS (après 5 corrections) |
+| Job d'ingestion (nominal, `no_scenes`, `all_cloud`) | `tests/test_ingest_job.py` (mocks monkeypatch) | ✅ PASS |
+| LSTM : fenêtres glissantes + prévision bornée | `tests/test_lstm.py` (forme, bornes [-1,1], brèche) | ✅ PASS |
+| Contrat STAC (réponse Earth Search mockée) | `tests/test_stac_contract.py` (`responses`) | ✅ PASS |
+| Parcours frontend complet (SSR, erreur API, carte) | `web/e2e/dashboard.spec.ts` (Playwright chromium) | ✅ PASS |
+| Intégration STAC réelle (Earth Search) | `tests/test_stac_live.py` (marker `integration`, hors CI) | ✅ PASS (réseau OK) |
 
-**Totaux mesurés** : 34 tests exécutés · 34 passés · 0 échoué · 0 corrigé
-(logique) · 5 erreurs de lint corrigées · 1 erreur de dépendance npm corrigée
-· 12 tests ajoutés en durcissement (étape 4).
+**Totaux mesurés** : 34 tests pytest · 3 tests Playwright · 1 test STAC live ·
+0 échoué · 5 erreurs de lint corrigées · 1 erreur de dépendance npm corrigée
+· 12 tests pytest ajoutés en durcissement · 3 tests frontend ajoutés.
 
-## Journal des corrections
+## Journal des corrections (campagne initiale)
 
 | Fichier | Problème | Cause racine | Correction appliquée | Test de non-régression |
 |---|---|---|---|---|
@@ -45,8 +52,19 @@ lint corrigées** (état final : 0), **0 échec initial** sur les 22 tests d'ori
 | `web/package.json` | `npm install` échoue : ETARGET `@types/maplibre-gl@^4.0.0` | Le package n'existe pas sur npm (max 1.14.0) ; maplibre-gl v4 embarque ses types | Suppression du devDependency invalide | `npx tsc --noEmit` : 0 erreur |
 | `web/package.json` | TypeScript : TS2688 type `react-dom` introuvable | `@types/react-dom` absent des devDependencies (requis par Next 14) | Ajout de `@types/react-dom@^18.3.0` | `npx tsc --noEmit` : 0 erreur |
 
-Aucun test n'a été supprimé, désactivé (`pytest.skip`) ou affaibli. Les corrections
-sont minimales et ciblées ; aucune logique métier n'a été modifiée.
+## Journal des ajouts (actions post-campagne)
+
+| Fichier | Action | Résultat |
+|---|---|---|
+| `requirements-dev.txt` | Séparation des dépendances de test (ruff, pytest, responses) hors prod | Install CI : `pip install -r requirements.txt -r requirements-dev.txt` |
+| `web/playwright.config.ts` + `web/e2e/dashboard.spec.ts` | Tests navigateur frontend (port 3101 dédié, `reuseExistingServer: false`) | 3 PASSED — titre, erreur API (role=alert filtré), carte MapLibre |
+| `tests/test_stac_live.py` + `pytest.ini` | Test d'intégration STAC réel, marker `integration` exclu par défaut | PASSED en local (Earth Search, 3.3s) ; hors CI |
+| `.github/workflows/ci.yml` | Ajout de l'étape Playwright (`--with-deps chromium`) | CI verte sur le commit précédent |
+
+**Note Playwright** : le port 3100 était occupé par un autre projet
+(Towncenter-DMV) sur la machine de dev — la config utilise 3101 et force
+`reuseExistingServer: false` pour garantir que le serveur Next.js du repo est
+testé, jamais un serveur étranger.
 
 ## Validation numérique (E2E synthétique) — confirmée
 
@@ -65,37 +83,33 @@ correspond au message réel de `src/indices/ndvi.py::summarize`.
 ## Exécution
 
 ```bash
-pytest tests/ -v          # unitaires + intégration + E2E + durcissement (tout offline) — 34 passés
+pip install -r requirements.txt -r requirements-dev.txt  # deps + dev
+pytest tests/ -v          # offline par défaut (34 tests) — marker integration exclu
 ruff check src tests      # lint (CI) — 0 erreur
-cd web && npx tsc --noEmit # TypeScript strict — 0 erreur
+cd web && npm ci && npx tsc --noEmit   # TypeScript strict — 0 erreur
+cd web && npx playwright test          # E2E frontend — 3 tests (démarre Next.js :3101)
+pytest tests/test_stac_live.py -m integration -v  # STAC réel (réseau, hors CI)
 ```
 
-Le test contractuel STAC utilise `responses` (dépendance de test) :
+La CI GitHub Actions (`.github/workflows/ci.yml`) rejoue lint + tests +
+typecheck + Playwright à chaque push/PR sur Python 3.12. Statut CI réel :
+**success** sur le commit `730d630` (campagne V&V).
 
-```bash
-pip install responses   # dev — requise pour tests/test_stac_contract.py
-```
+## Couverture fonctionnelle
 
-La CI GitHub Actions (`.github/workflows/ci.yml`) rejoue lint + tests à chaque
-push/PR sur Python 3.12. Il est recommandé d'y ajouter l'installation de
-`responses` (dev) et l'étape `npx tsc --noEmit` (frontend).
-
-## Couverture fonctionnelle restante (phase 4)
-
-Exigences **NON couvertes** par la campagne actuelle :
-
-| Exigence | État | Plan phase 4 |
+| Exigence | État | Plan |
 |---|---|---|
-| Appels STAC réels (Earth Search) | ✅ Couverte (contractuel) — `tests/test_stac_contract.py` : réponse Earth Search minimale mockée (`responses`), parsing + requête vérifiés | Remplacer le mock par un vrai endpoint STAC (intégration réseau, hors CI) |
-| Frontend Playwright (parcours UI complet) | Non couverte | `web/e2e/*.spec.ts` Playwright : chargement, erreur API, acquittement via l'UI |
-| Job d'ingestion avec mocks réseau | ✅ Couverte — `tests/test_ingest_job.py` : `run_ingestion` avec `search_scenes`/`load_bands` monkeypatchés (nominal, `no_scenes`, `all_cloud`) | Étendre au scénario avec alerte critique persistée |
-| Prédiction LSTM (fenêtres, prévision) | ✅ Couverte — `tests/test_lstm.py` : `make_windows` (forme, série courte, multidim), `forecast` (longueur, bornes [-1,1], brèche, pas de brèche) | Entraînement réel sur série NDVI historique (phase 5) |
+| Appels STAC réels (Earth Search) | ✅ Couverte (contractuel + live marqué) | `test_stac_live.py` en CI optionnelle si réseau autorisé |
+| Frontend Playwright (parcours UI) | ✅ Couverte — `web/e2e/dashboard.spec.ts` | Étendre : acquittement via l'UI avec un backend mocké |
+| Job d'ingestion avec mocks réseau | ✅ Couverte — `tests/test_ingest_job.py` | Étendre au scénario avec alerte critique persistée |
+| Prédiction LSTM | ✅ Couverte — `tests/test_lstm.py` | Entraînement réel sur série NDVI historique (phase 5) |
 
 ## Limites connues / Known limitations
 
-- Les appels STAC réels (réseau) ne sont pas couverts par les tests — à mocker
-  avec `responses`/`respx` en phase 4 (test d'intégration contractuelle).
-- Le frontend n'a pas encore de tests Playwright — prévu phase 4.
+- Le test STAC live dépend du réseau : exclu de la suite par défaut
+  (marker `integration`) pour garder la CI déterministe.
+- Playwright lance un build Next.js de production à chaque exécution (~30-40 s)
+  — acceptable en CI, plus lent en local.
 - La migration 001 utilise `gen_random_uuid()` : exécuter `CREATE EXTENSION pgcrypto`
   si erreur sur Postgres < 13.
 - `docker-compose.yml` et `.env.example` contiennent un mot de passe de

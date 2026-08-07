@@ -4,7 +4,7 @@
 > Automated shoreline monitoring — satellite imagery + AI, fully open source.
 
 ![CI](https://github.com/leosand/Riverside/actions/workflows/ci.yml/badge.svg)
-![Tests](https://img.shields.io/badge/tests-34%20passed%20%7C%200%20failed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-34%20pytest%20%2B%203%20Playwright%20%7C%200%20failed-brightgreen)
 
 ## Contexte / Context
 
@@ -47,16 +47,25 @@ Docs : [Architecture](docs/ARCHITECTURE.md) · [V&V](docs/VV.md) · OpenAPI : `/
 ```bash
 cp .env.example .env
 docker compose up -d db n8n
-pip install -r requirements.txt
-pip install responses        # dev — test contractuel STAC
+pip install -r requirements.txt -r requirements-dev.txt
 psql $DATABASE_URL -f db/migrations/001_init.sql
 uvicorn src.api.main:app --reload   # API : http://localhost:8000/docs
 cd web && npm install && npm run dev  # Frontend : http://localhost:3000
-pytest tests/ -v                      # 34 tests, tout offline
 ```
 
-**Statut des tests (2026-08-07)** : 34/34 passés, 0 échec — `ruff` 0 erreur,
-`tsc --noEmit` 0 erreur. Détails dans [docs/VV.md](docs/VV.md).
+## Tests
+
+```bash
+pytest tests/ -v                     # 34 tests pytest, tout offline (par défaut)
+ruff check src tests                 # lint — 0 erreur
+cd web && npx tsc --noEmit           # TypeScript strict — 0 erreur
+cd web && npx playwright test        # 3 tests E2E frontend (démarre Next.js :3101)
+pytest tests/test_stac_live.py -m integration -v   # STAC réel (réseau, hors CI)
+```
+
+**Statut des tests (2026-08-07)** : 34/34 pytest passés, 3/3 Playwright passés,
+0 échec — `ruff` 0 erreur, `tsc --noEmit` 0 erreur, CI verte sur `main`.
+Détails dans [docs/VV.md](docs/VV.md).
 
 ## API (v0.3)
 
@@ -73,7 +82,7 @@ pytest tests/ -v                      # 34 tests, tout offline
 - Aucun secret codé en dur — variables d'environnement uniquement (.env, jamais commité).
 - Données Copernicus libres de droits ; traitement local possible (Loi 25 friendly).
 - API : CORS restreint, erreurs RFC 7807, logs JSON structurés (structlog).
-- CI : ruff + pytest à chaque push (GitHub Actions).
+- CI : ruff + pytest + tsc + Playwright à chaque push (GitHub Actions).
 
 ## Roadmap
 
@@ -81,5 +90,6 @@ pytest tests/ -v                      # 34 tests, tout offline
 - [x] Phase 2 — CI, persistance SQLAlchemy, webhook n8n
 - [x] Phase 3 — Acknowledge, job ingestion, frontend MapLibre, E2E + V&V
 - [x] Phase 3.5 — V&V approfondie : durcissement tests (ingest_job, LSTM, STAC contractuel), lint + tsc à 0
-- [ ] Phase 4 — Playwright frontend, fine-tuning TorchGeo, DSen2-CR en production
+- [x] Phase 3.6 — Actions post-V&V : push CI, requirements-dev, Playwright frontend, test STAC live
+- [ ] Phase 4 — fine-tuning TorchGeo, DSen2-CR en production, acquittement via l'UI
 - [ ] Phase 5 — Rapports CSR bilingues FR/EN via LLM local (Ollama), intégration EBP

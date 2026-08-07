@@ -26,6 +26,12 @@ Riverside est un pipeline de surveillance des berges en trois couches :
   `forecast` (forme des tenseurs, bornes [-1,1], détection de brèche de seuil).
 - `tests/test_stac_contract.py` — contrat STAC Earth Search mocké (`responses`),
   parsing et requête vérifiés sans réseau.
+- `tests/test_stac_live.py` — intégration STAC réelle (Earth Search), marker
+  `integration` (exclu de la suite par défaut, hors CI).
+- `web/e2e/dashboard.spec.ts` — tests navigateur Playwright (chromium) : chargement
+  SSR, erreur API `role=alert`, rendu de la carte MapLibre. Le webServer Next.js
+  tourne sur le port **3101** (`reuseExistingServer: false`) — le port 3100 est
+  utilisé par un autre projet sur la machine de dev.
 
 ## Flux de données du job d'ingestion
 

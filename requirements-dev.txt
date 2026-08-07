@@ -1,0 +1,6 @@
+# Dépendances de test / dev (jamais déployées en production)
+# EN: Test-only dependencies — not part of the production requirements.
+
+ruff>=0.5                # lint (CI)
+pytest>=8.0              # runner (déjà dans requirements.txt)
+responses>=0.26          # test contractuel STAC (mock HTTP)

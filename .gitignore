@@ -12,3 +12,6 @@ checkpoints/
 *.tiff
 node_modules/
 *.tsbuildinfo
+.next/
+test-results/
+playwright-report/
