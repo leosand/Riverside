@@ -15,6 +15,18 @@ Riverside est un pipeline de surveillance des berges en trois couches :
    notification n8n (`src/alerts/notify.py`), API FastAPI (`src/api/main.py`),
    frontend Next.js + MapLibre (`web/`).
 
+## Tests (couverture)
+
+- `tests/` — unitaires + intégration (SQLite in-memory, offline).
+- `tests/e2e/` — pipeline synthétique (red=2000/nir=8000 → NDVI 0.6) et cycle
+  API complet, sans réseau.
+- `tests/test_ingest_job.py` — job `run_ingestion` avec `search_scenes`/
+  `load_bands` monkeypatchés (nominal, `no_scenes`, `all_cloud`).
+- `tests/test_lstm.py` — fenêtres glissantes `make_windows` et prévision
+  `forecast` (forme des tenseurs, bornes [-1,1], détection de brèche de seuil).
+- `tests/test_stac_contract.py` — contrat STAC Earth Search mocké (`responses`),
+  parsing et requête vérifiés sans réseau.
+
 ## Flux de données du job d'ingestion
 
 ```

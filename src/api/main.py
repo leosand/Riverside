@@ -7,7 +7,7 @@ Persistance best-effort : une panne DB ne bloque jamais l'évaluation dry-run.
 from __future__ import annotations
 
 from datetime import date
-from typing import Any
+from typing import Annotated, Any
 
 import structlog
 from fastapi import FastAPI, Query, Request
@@ -81,10 +81,10 @@ class ScenesResponse(BaseModel):
 
 @app.get("/api/v1/scenes", response_model=ScenesResponse)
 def list_scenes(
-    bbox: str = Query(..., description="minx,miny,maxx,maxy en WGS84"),
-    start: date = Query(...),
-    end: date = Query(...),
-    max_cloud: float = Query(default=20.0, ge=0, le=100),
+    bbox: Annotated[str, Query(description="minx,miny,maxx,maxy en WGS84")],
+    start: Annotated[date, Query()],
+    end: Annotated[date, Query()],
+    max_cloud: Annotated[float, Query(ge=0, le=100)] = 20.0,
 ) -> ScenesResponse:
     """Recherche les scènes Sentinel-2 disponibles / search available scenes."""
     parts = tuple(float(v) for v in bbox.split(","))

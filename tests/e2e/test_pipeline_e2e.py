@@ -10,14 +10,13 @@ import pytest
 import xarray as xr
 from sqlalchemy import create_engine
 
-from src.alerts.repository import acknowledge_alert, list_open_alerts
+from src.alerts.repository import acknowledge_alert, list_open_alerts, save_alert
 from src.alerts.repository import metadata as alerts_metadata
-from src.alerts.repository import save_alert
 from src.alerts.thresholds import evaluate_ndvi
 from src.cloud_removal.run_dsen2cr import temporal_median_composite
 from src.indices.ndvi import compute_ndvi, summarize
 from src.pipeline.repository import metadata as series_metadata
-from src.pipeline.repository import ndvi_series_table, save_ndvi_series
+from src.pipeline.repository import save_ndvi_series
 
 
 def _synthetic_stack() -> xr.DataArray:
@@ -71,7 +70,7 @@ def test_e2e_synthetic_scene_to_alert(tmp_path) -> None:
 
 def test_e2e_all_cloud_scene_raises() -> None:
     stack = _synthetic_stack()
-    stack.loc[dict(band="scl")] = 8.0  # tout nuageux / fully cloudy
+    stack.loc[{"band": "scl"}] = 8.0  # tout nuageux / fully cloudy
     composite = temporal_median_composite(stack)
     ndvi = compute_ndvi(composite["red"], composite["nir"])
     with pytest.raises(ValueError, match="nuageuse|cloud"):

@@ -17,7 +17,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt ruff
+        run: pip install -r requirements.txt ruff responses
 
       - name: Lint (ruff)
         run: ruff check src tests
@@ -25,3 +25,9 @@ jobs:
       - name: Tests (pytest)
         run: pytest tests/ -v
         # Tests offline uniquement — pas de service PostGIS requis au MVP
+
+      - name: Frontend typecheck (tsc)
+        run: |
+          cd web
+          npm ci
+          npx tsc --noEmit
