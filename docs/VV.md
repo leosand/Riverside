@@ -93,7 +93,8 @@ pytest tests/test_stac_live.py -m integration -v  # STAC réel (réseau, hors CI
 
 La CI GitHub Actions (`.github/workflows/ci.yml`) rejoue lint + tests +
 typecheck + Playwright à chaque push/PR sur Python 3.12. Statut CI réel :
-**success** sur les commits `730d630` (campagne V&V) et `c7abe93` (actions 1-3).
+**success** sur les commits `730d630` (campagne V&V), `c7abe93` (actions 1-3)
+et `b6aeebd` (fix aoi_id UUID + déploiement Docker).
 
 ## Déploiement Docker (validation environnement réelle)
 
