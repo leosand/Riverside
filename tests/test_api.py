@@ -15,7 +15,7 @@ def test_evaluate_alert_critical_without_db_still_200() -> None:
     # Persistance best-effort : sans DB, l'évaluation répond quand même
     r = client.post(
         "/api/v1/alerts/evaluate",
-        json={"aoi_id": "demo", "ndvi_mean": 0.20, "threshold": 0.30},
+        json={"aoi_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", "ndvi_mean": 0.20, "threshold": 0.30},
     )
     assert r.status_code == 200
     body = r.json()
@@ -26,7 +26,7 @@ def test_evaluate_alert_critical_without_db_still_200() -> None:
 def test_evaluate_no_alert() -> None:
     r = client.post(
         "/api/v1/alerts/evaluate",
-        json={"aoi_id": "demo", "ndvi_mean": 0.55, "threshold": 0.30},
+        json={"aoi_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", "ndvi_mean": 0.55, "threshold": 0.30},
     )
     assert r.status_code == 200
     assert r.json()["should_alert"] is False

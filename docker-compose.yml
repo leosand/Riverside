@@ -1,6 +1,7 @@
-version: "3.9"
-
 # Riverside MVP — stack locale 100% open source
+# EN: local 100% open-source stack. Les ports exposés sont définis dans
+# docker-compose.override.yml (ports dédiés — les ports par défaut 5432/3000/
+# 8000 sont occupés par d'autres projets sur la machine de dev).
 services:
   db:
     image: postgis/postgis:16-3.4
@@ -8,8 +9,6 @@ services:
       POSTGRES_USER: riverside
       POSTGRES_PASSWORD: changeme   # TODO: secrets store en production
       POSTGRES_DB: riverside
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,16 +21,12 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file: .env
-    ports:
-      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
 
   n8n:
     image: n8nio/n8n:latest
-    ports:
-      - "5678:5678"
     volumes:
       - n8ndata:/home/node/.n8n
 

@@ -30,7 +30,7 @@ def test_e2e_alert_lifecycle(sqlite_db) -> None:
     # 1) Évaluation sous le seuil → alerte critique persistée
     r = client.post(
         "/api/v1/alerts/evaluate",
-        json={"aoi_id": "aoi-e2e", "ndvi_mean": 0.20, "threshold": 0.30},
+        json={"aoi_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "ndvi_mean": 0.20, "threshold": 0.30},
     )
     assert r.status_code == 200
     body = r.json()
@@ -39,7 +39,7 @@ def test_e2e_alert_lifecycle(sqlite_db) -> None:
     assert alert_id is not None
 
     # 2) L'alerte apparaît dans les ouvertes
-    r = client.get("/api/v1/alerts/open", params={"aoi_id": "aoi-e2e"})
+    r = client.get("/api/v1/alerts/open", params={"aoi_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"})
     assert r.status_code == 200 and r.json()["count"] == 1
 
     # 3) Acquittement

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from datetime import date
 from typing import Annotated, Any
+from uuid import UUID
 
 import structlog
 from fastapi import FastAPI, Query, Request
@@ -95,13 +96,15 @@ def list_scenes(
 
 
 class EvaluateRequest(BaseModel):
-    aoi_id: str
+    """Requête d'évaluation / evaluate request. aoi_id UUID (schéma Postgres)."""
+
+    aoi_id: UUID
     ndvi_mean: float = Field(ge=-1, le=1)
     threshold: float | None = Field(default=None, gt=0, le=1)
 
 
 class EvaluateResponse(BaseModel):
-    aoi_id: str
+    aoi_id: UUID
     should_alert: bool
     severity: str
     metric: str
@@ -163,8 +166,8 @@ def evaluate_alert(req: EvaluateRequest) -> EvaluateResponse:
 
 @app.get("/api/v1/alerts/open")
 def open_alerts(
-    aoi_id: str | None = Query(default=None),
-    limit: int = Query(default=50, ge=1, le=500),
+    aoi_id: Annotated[UUID | None, Query()] = None,
+    limit: Annotated[int, Query(ge=1, le=500)] = 50,
 ) -> dict[str, Any]:
     """Alertes non acquittées / unacknowledged alerts (503 si DB indisponible)."""
     rows = list_open_alerts(get_engine(), aoi_id, limit)

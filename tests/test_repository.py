@@ -21,7 +21,7 @@ def _decision(severity: str = "critical") -> AlertDecision:
 
 def test_save_and_list_open_alerts() -> None:
     engine = _engine()
-    alert_id = save_alert(engine, "aoi-1", _decision())
+    alert_id = save_alert(engine, "cccccccc-cccc-4ccc-8ccc-cccccccccccc", _decision())
     rows = list_open_alerts(engine)
     assert len(rows) == 1
     assert rows[0]["id"] == alert_id
@@ -31,10 +31,10 @@ def test_save_and_list_open_alerts() -> None:
 
 def test_list_open_alerts_filter_by_aoi() -> None:
     engine = _engine()
-    save_alert(engine, "aoi-1", _decision())
-    save_alert(engine, "aoi-2", _decision("warning"))
-    rows = list_open_alerts(engine, aoi_id="aoi-1")
-    assert len(rows) == 1 and rows[0]["aoi_id"] == "aoi-1"
+    save_alert(engine, "cccccccc-cccc-4ccc-8ccc-cccccccccccc", _decision())
+    save_alert(engine, "dddddddd-dddd-4ddd-8ddd-dddddddddddd", _decision("warning"))
+    rows = list_open_alerts(engine, aoi_id="cccccccc-cccc-4ccc-8ccc-cccccccccccc")
+    assert len(rows) == 1 and rows[0]["aoi_id"] == "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
 
 
 def test_table_matches_migration_columns() -> None:

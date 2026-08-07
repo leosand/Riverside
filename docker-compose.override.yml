@@ -1,0 +1,17 @@
+# Override de déploiement local — ports dédiés Riverside.
+# EN: Local deploy override — Riverside-dedicated ports. Nécessaire car les
+# ports par défaut (5432/3000/8000) sont occupés par d'autres projets locaux
+# (towncenter, uvicorn backend). Usage :
+#   docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
+services:
+  db:
+    ports:
+      - "5433:5432"   # PostGIS Riverside → hôte :5433
+
+  api:
+    ports:
+      - "8001:8000"   # API Riverside → hôte :8001
+
+  n8n:
+    ports:
+      - "5679:5678"   # n8n Riverside → hôte :5679

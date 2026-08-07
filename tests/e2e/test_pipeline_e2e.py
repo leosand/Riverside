@@ -53,7 +53,7 @@ def test_e2e_synthetic_scene_to_alert(tmp_path) -> None:
     engine = create_engine(f"sqlite:///{tmp_path}/e2e.db")
     alerts_metadata.create_all(engine)
     series_metadata.create_all(engine)
-    save_ndvi_series(engine, "aoi-e2e", date(2026, 7, 15), stats)
+    save_ndvi_series(engine, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", date(2026, 7, 15), stats)
 
     # 4) Évaluation : 0.6 > seuil 0.30 → pas d'alerte
     decision = evaluate_ndvi(stats["ndvi_mean"], 0.30)
@@ -62,7 +62,7 @@ def test_e2e_synthetic_scene_to_alert(tmp_path) -> None:
     # 5) Scénario de brèche : NDVI dégradé → alerte critique → acquittement
     breach = evaluate_ndvi(0.20, 0.30)
     assert breach.should_alert and breach.severity == "critical"
-    alert_id = save_alert(engine, "aoi-e2e", breach)
+    alert_id = save_alert(engine, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", breach)
     assert len(list_open_alerts(engine)) == 1
     assert acknowledge_alert(engine, alert_id) is True
     assert list_open_alerts(engine) == []

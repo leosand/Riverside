@@ -53,6 +53,39 @@ uvicorn src.api.main:app --reload   # API : http://localhost:8000/docs
 cd web && npm install && npm run dev  # Frontend : http://localhost:3000
 ```
 
+## Déploiement Docker (local)
+
+La stack complète (PostGIS + API + n8n) se déploie avec Docker Compose :
+
+```bash
+cp .env.example .env          # ajustez DATABASE_URL et les secrets
+docker compose up -d --build  # db (PostGIS) + api (FastAPI) + n8n
+docker compose ps             # vérifier le statut (healthy)
+```
+
+**Ports exposés** (config par défaut) : API `:8000`, PostGIS `:5432`, n8n `:5678`.
+
+> ⚠️ Sur cette machine de dev, les ports `5432`/`3000`/`8000` sont occupés par
+> d'autres projets (towncenter, un uvicorn backend). Le fichier
+> `docker-compose.override.yml` mappe donc Riverside sur des ports dédiés :
+> **API `:8001`**, PostGIS `:5433`, n8n `:5679**. Utilisez-le avec :
+> `docker compose -f docker-compose.yml -f docker-compose.override.yml up -d`
+
+Vérification :
+
+```bash
+curl http://localhost:8001/health        # → {"status":"ok","service":"riverside"}
+curl http://localhost:8001/docs          # → OpenAPI Swagger UI
+```
+
+Initialisation de la base (premier démarrage) :
+
+```bash
+docker compose exec db psql -U riverside -d riverside -f /docker-entrypoint-initdb.d/001_init.sql
+# ou, si la migration n'est pas montée :
+docker compose exec -T db psql -U riverside -d riverside < db/migrations/001_init.sql
+```
+
 ## Tests
 
 ```bash
@@ -68,6 +101,10 @@ pytest tests/test_stac_live.py -m integration -v   # STAC réel (réseau, hors C
 Détails dans [docs/VV.md](docs/VV.md).
 
 ## API (v0.3)
+
+> **`aoi_id` est un UUID** (schéma Postgres) — la validation pydantic rejette
+> les identifiants libres avec une erreur 422. L'alerte exige une AOI existante
+> en base (FK `alerts_aoi_id_fkey`).
 
 | Méthode | Endpoint | Rôle |
 |---|---|---|

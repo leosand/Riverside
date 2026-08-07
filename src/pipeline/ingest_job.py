@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
+from uuid import UUID
 
 import structlog
 
@@ -28,7 +29,7 @@ log = structlog.get_logger()
 class IngestionReport:
     """Compte rendu d'exécution / job execution report."""
 
-    aoi_id: str
+    aoi_id: str | UUID
     scenes_used: int
     observed_at: date | None
     ndvi_mean: float | None
@@ -39,7 +40,7 @@ class IngestionReport:
 
 def run_ingestion(
     engine,  # sqlalchemy.Engine — type lax pour injection en tests / DI-friendly
-    aoi_id: str,
+    aoi_id: UUID,
     bbox: tuple[float, float, float, float],
     start: date,
     end: date,

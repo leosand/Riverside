@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import uuid
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy import (
     Boolean,
@@ -41,14 +42,16 @@ alerts_table = Table(
 )
 
 
-def save_alert(engine: Engine, aoi_id: str, decision: AlertDecision) -> str:
+def save_alert(engine: Engine, aoi_id: str | UUID, decision: AlertDecision) -> str:
     """Insère une alerte en transaction / transactional insert, returns id."""
     alert_id = str(uuid.uuid4())
+    # Normalisation UUID → str : SQLite ne binde pas UUID natif / SQLite lacks UUID binding
+    aoi_id_str = str(aoi_id)
     with engine.begin() as conn:  # transaction auto-commit/rollback
         conn.execute(
             alerts_table.insert().values(
                 id=alert_id,
-                aoi_id=aoi_id,
+                aoi_id=aoi_id_str,
                 metric=decision.metric,
                 value=decision.value,
                 threshold=decision.threshold,
@@ -60,7 +63,7 @@ def save_alert(engine: Engine, aoi_id: str, decision: AlertDecision) -> str:
 
 
 def list_open_alerts(
-    engine: Engine, aoi_id: str | None = None, limit: int = 50
+    engine: Engine, aoi_id: str | UUID | None = None, limit: int = 50
 ) -> list[dict[str, Any]]:
     """Alertes non acquittées, plus récentes d'abord / unacknowledged alerts."""
     stmt = (
@@ -70,7 +73,7 @@ def list_open_alerts(
         .limit(limit)
     )
     if aoi_id is not None:
-        stmt = stmt.where(alerts_table.c.aoi_id == aoi_id)
+        stmt = stmt.where(alerts_table.c.aoi_id == str(aoi_id))
     with engine.connect() as conn:
         return [dict(row._mapping) for row in conn.execute(stmt)]
 

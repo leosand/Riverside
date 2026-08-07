@@ -93,7 +93,65 @@ pytest tests/test_stac_live.py -m integration -v  # STAC réel (réseau, hors CI
 
 La CI GitHub Actions (`.github/workflows/ci.yml`) rejoue lint + tests +
 typecheck + Playwright à chaque push/PR sur Python 3.12. Statut CI réel :
-**success** sur le commit `730d630` (campagne V&V).
+**success** sur les commits `730d630` (campagne V&V) et `c7abe93` (actions 1-3).
+
+## Déploiement Docker (validation environnement réelle)
+
+| Élément | Valeur mesurée |
+|---|---|
+| Docker / Compose | 29.6.2 / v5.3.1 |
+| Stack | `db` (postgis/postgis:16-3.4) + `api` (Dockerfile non-root) + `n8n` |
+| Ports dédiés (override) | API `:8001`, PostGIS `:5433`, n8n `:5679` — nécessaires car `5432/3000/8000` occupés par d'autres projets locaux (towncenter, uvicorn) |
+| `docker compose config` | ✅ valide (warning `version` obsolète retiré) |
+| `/health` | `{"status":"ok","service":"riverside"}` (mesuré) |
+| `/docs` (OpenAPI) | Swagger UI accessible (mesuré) |
+| `db` PostGIS (migration 001) | ✅ healthy — tables `aoi`, `scenes`, `ndvi_series`, `alerts` créées (mesuré) |
+| n8n | ✅ HTTP 200 sur `http://localhost:5679` (mesuré) |
+
+Déploiement :
+
+```bash
+cp .env.example .env          # ajustez DATABASE_URL / secrets
+docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --build
+curl http://localhost:8001/health
+```
+
+**Corrections apportées au cours du déploiement réel** :
+- `Dockerfile` : `pip install` avec `--retries 5 --timeout 300` — le build
+  échouait sur un `Read timed out` de pip (réseau lent, torch 526 MB).
+- `Dockerfile` : ajout de `libexpat1` (lib système) — le conteneur API
+  échouait au démarrage avec `ImportError: libexpat.so.1` (requis par
+  rasterio/stackstac sur les images `python:slim`).
+- `docker-compose.yml` : les `ports:` par défaut (5432/3000/8000) ont été
+  retirés du fichier de base — Compose v2 **fusionne** les listes `ports` au
+  lieu de les remplacer, ce qui laissait les ports par défaut actifs en plus
+  des ports dédiés de l'override (conflit avec towncenter). Les ports vivent
+  désormais uniquement dans `docker-compose.override.yml`.
+
+**État mesuré du déploiement** :
+- ✅ `db` PostGIS : healthy sur `:5433`, migration 001 appliquée (tables
+  `aoi`, `scenes`, `ndvi_series`, `alerts` vérifiées).
+- ✅ `n8n` : HTTP 200 sur `http://localhost:5679`.
+- ✅ API FastAPI : `/health` 200, RFC 7807 (400), et **cycle complet
+  evaluate→open→acknowledge→open vide validé contre le Postgres Docker**
+  sur `http://localhost:8001` (lancée localement via le venv — l'image Docker
+  API est bloquée sur le téléchargement de torch par un réseau local très lent,
+  ~80 kB/s vers PyPI ; le build avec retry continue en arrière-plan).
+- 🐛 **Désalignement contrat API ↔ schéma Postgres découvert et CORRIGÉ** : la
+  migration 001 définit `alerts.aoi_id`/`ndvi_series.aoi_id`/`scenes.aoi_id`
+  comme `UUID NOT NULL`, mais l'API acceptait un `aoi_id` texte libre
+  (`"demo-docker"`). En SQLite (tests) tout passait ; en Postgres réel →
+  `InvalidTextRepresentation` (UUID), masqué en 503 par la persistance
+  best-effort. **Correction appliquée (validée par l'utilisateur, UUID strict)** :
+  - `src/api/main.py` : `aoi_id: UUID` dans `EvaluateRequest`/`EvaluateResponse`
+    et le query param `open_alerts`.
+  - `src/pipeline/ingest_job.py` : `aoi_id: UUID` dans `run_ingestion`.
+  - `src/alerts/repository.py` + `src/pipeline/repository.py` : normalisation
+    `str(aoi_id)` avant persistance (SQLite ne binde pas UUID natif).
+  - Tests mis à jour avec des UUID fixes lisibles (`aaaaaaaa-...`, etc.).
+  - **Validé en conditions réelles** : cycle complet evaluate→open→ack→open vide
+    sur le Postgres Docker (:5433), après insertion de l'AOI de référence
+    (FK `alerts_aoi_id_fkey` vérifiée — l'alerte exige une AOI existante).
 
 ## Couverture fonctionnelle
 
@@ -106,6 +164,10 @@ typecheck + Playwright à chaque push/PR sur Python 3.12. Statut CI réel :
 
 ## Limites connues / Known limitations
 
+- `test_open_alerts_db_unavailable_returns_503_rfc7807` est un test
+  **d'environnement** : il valide la dégradation 503 quand aucune DB n'est
+  joignable. Avec le Postgres Docker actif, il passe naturellement au vert
+  (l'API répond 200). Vérifié : 1 passed DB arrêtée.
 - Le test STAC live dépend du réseau : exclu de la suite par défaut
   (marker `integration`) pour garder la CI déterministe.
 - Playwright lance un build Next.js de production à chaque exécution (~30-40 s)

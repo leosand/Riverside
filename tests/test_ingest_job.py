@@ -62,7 +62,7 @@ def test_run_ingestion_nominal(tmp_path, monkeypatch) -> None:
 
     report = run_ingestion(
         engine,
-        "aoi-nominal",
+        "11111111-1111-4111-8111-111111111111",
         (0, 0, 1, 1),
         date(2026, 7, 1),
         date(2026, 7, 10),
@@ -86,7 +86,7 @@ def test_run_ingestion_no_scenes(tmp_path, monkeypatch) -> None:
 
     report = run_ingestion(
         engine,
-        "aoi-none",
+        "22222222-2222-4222-8222-222222222222",
         (0, 0, 1, 1),
         date(2026, 7, 1),
         date(2026, 7, 10),
@@ -112,7 +112,7 @@ def test_run_ingestion_all_cloud(tmp_path, monkeypatch) -> None:
 
     report = run_ingestion(
         engine,
-        "aoi-cloud",
+        "33333333-3333-4333-8333-333333333333",
         (0, 0, 1, 1),
         date(2026, 7, 1),
         date(2026, 7, 10),
