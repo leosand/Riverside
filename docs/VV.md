@@ -135,9 +135,9 @@ curl http://localhost:8001/health
 - ✅ `n8n` : HTTP 200 sur `http://localhost:5679`.
 - ✅ API FastAPI : `/health` 200, RFC 7807 (400), et **cycle complet
   evaluate→open→acknowledge→open vide validé contre le Postgres Docker**
-  sur `http://localhost:8001` (lancée localement via le venv — l'image Docker
-  API est bloquée sur le téléchargement de torch par un réseau local très lent,
-  ~80 kB/s vers PyPI ; le build avec retry continue en arrière-plan).
+  sur `http://localhost:8001` (conteneur Docker `riverside-api` (image avec libexpat, ports dédiés).
+  Le build a été relancé 4 fois (réseau local instable, ~80 kB/s vers PyPI)
+  avant d'aboutir — le retry pip (`--retries 5 --timeout 300`) a fini par passer).
 - 🐛 **Désalignement contrat API ↔ schéma Postgres découvert et CORRIGÉ** : la
   migration 001 définit `alerts.aoi_id`/`ndvi_series.aoi_id`/`scenes.aoi_id`
   comme `UUID NOT NULL`, mais l'API acceptait un `aoi_id` texte libre
