@@ -3,6 +3,7 @@ import { fetchOpenAlerts, type Alert } from "@/lib/api";
 import { NdviMap } from "@/components/NdviMap";
 import { NdviSeriesChart } from "@/components/NdviSeriesChart";
 import { AlertPanel } from "@/components/AlertPanel";
+import { NdviTable } from "@/components/NdviTable";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,14 @@ export default async function DashboardPage() {
                 <h2 id="serie-titre">Évolution NDVI (juin–juil. 2026)</h2>
               </div>
               <NdviSeriesChart />
+            </section>
+
+            <section className="panel" aria-labelledby="table-titre">
+              <div className="panel-head">
+                <h2 id="table-titre">Tableau d'évolution NDVI</h2>
+                <span className="legend-note">Données réelles · API /api/v1/ndvi/series</span>
+              </div>
+              <NdviTable aoiId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" />
             </section>
 
             <section className="panel" aria-labelledby="alertes-titre">

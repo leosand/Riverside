@@ -49,8 +49,17 @@ export function NdviSeriesChart() {
       </p>
     );
   }
-  if (data === null || data.series.length === 0) {
+  if (data === null) {
     return <p className="empty-state">Chargement des données NDVI…</p>;
+  }
+  if (data.series.length === 0) {
+    return (
+      <p className="empty-state" role="alert">
+        Aucune série NDVI enregistrée pour cette zone — exécutez le pipeline
+        d'ingestion (STAC → NDVI → ndvi_series), puis{" "}
+        <code>python scripts/export_ndvi_json.py --aoi-id &lt;uuid&gt;</code>.
+      </p>
+    );
   }
 
   const threshold = data.threshold ?? DEFAULT_THRESHOLD;

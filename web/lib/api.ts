@@ -45,3 +45,30 @@ export async function acknowledgeAlert(alertId: string): Promise<void> {
     throw new Error(`Acknowledge failed: HTTP ${res.status}`);
   }
 }
+
+export interface NdviSeriesPoint {
+  date: string;
+  ndvi_mean: number;
+  ndvi_p10: number | null;
+  ndvi_p90: number | null;
+  ndwi_mean: number | null;
+}
+
+export interface NdviSeriesResponse {
+  aoi_id: string;
+  threshold: number;
+  count: number;
+  series: NdviSeriesPoint[];
+}
+
+/** Série temporelle NDVI d'une AOI / NDVI series for one AOI. */
+export async function fetchNdviSeries(aoiId: string): Promise<NdviSeriesResponse> {
+  const res = await fetch(
+    `${API_URL}/api/v1/ndvi/series?aoi_id=${encodeURIComponent(aoiId)}`,
+    { cache: "no-store" },
+  );
+  if (!res.ok) {
+    throw new Error(`API ${res.status}: ${await res.text()}`);
+  }
+  return (await res.json()) as NdviSeriesResponse;
+}

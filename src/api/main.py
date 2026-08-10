@@ -20,6 +20,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.alerts.notify import notify_n8n
 from src.alerts.repository import acknowledge_alert, list_open_alerts, save_alert
 from src.alerts.thresholds import evaluate_ndvi
+from src.api.ndvi_router import router as ndvi_router
 from src.api.reports_router import router as reports_router
 from src.config import settings
 from src.db.session import get_engine
@@ -42,6 +43,7 @@ app.add_middleware(
 )
 
 app.include_router(reports_router)
+app.include_router(ndvi_router)
 
 
 class ProblemDetail(BaseModel):

@@ -61,7 +61,8 @@ pédagogique « Comprendre ce que vous voyez ».
 
 | Capture | Description |
 |---|---|
-| ![Desktop](docs/screenshots/dashboard-desktop.png) | Vue complète (carte + série + alertes + projet + explainer) |
+| ![Desktop](docs/screenshots/dashboard-desktop.png) | Vue complète (carte + série + tableau + alertes + projet + explainer) |
+| ![Tableau](docs/screenshots/dashboard-tableau.png) | Tableau d'évolution NDVI (données de l'API) |
 | ![Projet](docs/screenshots/dashboard-projet.png) | Le projet en bref (problème, solution, pipeline) |
 | ![Alertes](docs/screenshots/dashboard-alertes.png) | Panneau des alertes avec explication |
 | ![Expliquer](docs/screenshots/dashboard-expliquer.png) | Bloc pédagogique (NDVI, seuil, sources) |
@@ -127,6 +128,8 @@ Détails dans [docs/VV.md](docs/VV.md).
 | POST | `/api/v1/alerts/evaluate` | Évalue NDVI vs seuil → persiste + notifie si critique |
 | GET | `/api/v1/alerts/open` | Alertes non acquittées |
 | POST | `/api/v1/alerts/{id}/acknowledge` | Acquitte une alerte (404 sinon) |
+| GET | `/api/v1/ndvi/series?aoi_id=` | Série temporelle NDVI d'une AOI (évolution, p10–p90, NDWI) |
+| GET | `/api/v1/reports/csr?aoi_id=` | Rapport CSR bilingue (contexte factuel + narrative Ollama optionnelle) |
 
 ## Sécurité & conformité
 

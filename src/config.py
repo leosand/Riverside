@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     default_collection: str = "sentinel-2-l2a"
     max_cloud_cover: float = 20.0
     ndvi_alert_threshold: float = 0.30
-    allowed_origins: str = "http://localhost:3000"
+    allowed_origins: str = "http://localhost:3000,http://localhost:3101,http://127.0.0.1:3101"
     # Webhook n8n pour alertes critiques — None = désactivé / disabled when unset
     n8n_webhook_url: str | None = None
 
