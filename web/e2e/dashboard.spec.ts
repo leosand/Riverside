@@ -36,3 +36,11 @@ test("le panneau des alertes réglementaires est présent", async ({ page }) => 
     page.getByRole("heading", { name: "Alertes réglementaires" }),
   ).toBeVisible();
 });
+
+test("le bloc pédagogique explique le projet", async ({ page }) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Comprendre ce que vous voyez" }),
+  ).toBeVisible();
+  await expect(page.getByText("C'est quoi le NDVI")).toBeVisible();
+});

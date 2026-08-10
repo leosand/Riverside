@@ -203,3 +203,71 @@
     height: 340px;
   }
 }
+
+/* Bloc pédagogique / explainer */
+.explainer {
+  margin-top: 1.5rem;
+  padding: 1.2rem 1.4rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.explainer h2 {
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.explainer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.explainer-card {
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+}
+
+.explainer-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+.explainer-card p {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.explainer-card ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.explainer-card li {
+  margin-bottom: 0.25rem;
+}
+
+/* Explication dans les alertes */
+.alert-explain {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+@media (max-width: 900px) {
+  .explainer-grid {
+    grid-template-columns: 1fr;
+  }
+}
