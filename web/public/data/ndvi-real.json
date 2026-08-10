@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "source": "synthetic_placeholder",
+    "warning": "DONNÉES SYNTHÉTIQUES DE MISE EN PAGE — régénérer via : python scripts/export_ndvi_json.py --aoi-id <uuid> après un run du pipeline réel (STAC → NDVI → ndvi_series). NOT real measurements.",
+    "generated_at": "2026-08-09T00:00:00+00:00",
+    "aoi_id": "00000000-0000-0000-0000-000000000000"
+  },
+  "aoi": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "bbox": [-79.65, 43.55, -79.3, 43.75]
+  },
+  "threshold": 0.3,
+  "series": [
+    {"date": "2026-06-05", "ndvi_mean": 0.42, "ndvi_p10": 0.28, "ndvi_p90": 0.55, "ndwi_mean": -0.12},
+    {"date": "2026-06-15", "ndvi_mean": 0.47, "ndvi_p10": 0.31, "ndvi_p90": 0.59, "ndwi_mean": -0.10},
+    {"date": "2026-06-25", "ndvi_mean": 0.51, "ndvi_p10": 0.35, "ndvi_p90": 0.63, "ndwi_mean": -0.09},
+    {"date": "2026-07-05", "ndvi_mean": 0.55, "ndvi_p10": 0.38, "ndvi_p90": 0.66, "ndwi_mean": -0.07},
+    {"date": "2026-07-15", "ndvi_mean": 0.58, "ndvi_p10": 0.41, "ndvi_p90": 0.69, "ndwi_mean": -0.06},
+    {"date": "2026-07-25", "ndvi_mean": 0.56, "ndvi_p10": 0.39, "ndvi_p90": 0.67, "ndwi_mean": -0.08},
+    {"date": "2026-08-04", "ndvi_mean": 0.53, "ndvi_p10": 0.36, "ndvi_p90": 0.64, "ndwi_mean": -0.09}
+  ]
+}
