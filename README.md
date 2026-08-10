@@ -53,6 +53,19 @@ uvicorn src.api.main:app --reload   # API : http://localhost:8000/docs
 cd web && npm install && npm run dev  # Frontend : http://localhost:3000
 ```
 
+## Aperçu du dashboard
+
+Le frontend présente un tableau de bord de surveillance des berges : carte NDVI,
+série temporelle Sentinel-2, alertes réglementaires expliquées et un bloc
+pédagogique « Comprendre ce que vous voyez ».
+
+| Capture | Description |
+|---|---|
+| ![Desktop](docs/screenshots/dashboard-desktop.png) | Vue complète (carte + série + alertes + explainer) |
+| ![Alertes](docs/screenshots/dashboard-alertes.png) | Panneau des alertes avec explication |
+| ![Expliquer](docs/screenshots/dashboard-expliquer.png) | Bloc pédagogique (NDVI, seuil, sources) |
+| ![Mobile](docs/screenshots/dashboard-mobile.png) | Vue mobile responsive |
+
 ## Déploiement Docker (local)
 
 La stack complète (PostGIS + API + n8n) se déploie avec Docker Compose :
