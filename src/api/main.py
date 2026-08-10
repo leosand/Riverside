@@ -20,6 +20,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.alerts.notify import notify_n8n
 from src.alerts.repository import acknowledge_alert, list_open_alerts, save_alert
 from src.alerts.thresholds import evaluate_ndvi
+from src.api.reports_router import router as reports_router
 from src.config import settings
 from src.db.session import get_engine
 from src.ingest.stac_client import SceneSummary, search_scenes
@@ -39,6 +40,8 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
+
+app.include_router(reports_router)
 
 
 class ProblemDetail(BaseModel):

@@ -12,34 +12,25 @@ import {
   YAxis,
 } from "recharts";
 
-export interface NdviPoint {
-  item_id: string;
+/** Format du fichier ndvi-real.json (généré par scripts/export_ndvi_json.py). */
+export interface NdviSeriesPoint {
   date: string;
-  cloud_cover: number;
   ndvi_mean: number;
-  ndvi_p10: number;
-  ndvi_p90: number;
-}
-
-export interface NdviSnapshot {
-  ndvi_mean: number | null;
-  valid_ratio: number;
-  p10?: number;
-  p50?: number;
-  p90?: number;
+  ndvi_p10?: number;
+  ndvi_p90?: number;
+  ndwi_mean?: number;
 }
 
 export interface NdviData {
-  bbox: number[];
-  zone: string;
-  series: NdviPoint[];
-  snapshot: NdviSnapshot;
-  threshold: number;
+  meta?: { source?: string; generated_at?: string; aoi_id?: string };
+  aoi?: { id?: string; bbox?: number[] };
+  threshold?: number;
+  series: NdviSeriesPoint[];
 }
 
-const THRESHOLD = 0.3;
+const DEFAULT_THRESHOLD = 0.3;
 
-/** Série temporelle NDVI réelle (Sentinel-2, lac Ontario). */
+/** Série temporelle NDVI (Sentinel-2, export pipeline / mise en page). */
 export function NdviSeriesChart() {
   const [data, setData] = useState<NdviData | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -62,15 +53,18 @@ export function NdviSeriesChart() {
     return <p className="empty-state">Chargement des données NDVI…</p>;
   }
 
+  const threshold = data.threshold ?? DEFAULT_THRESHOLD;
   const chartData = data.series.map((p) => ({
     date: new Date(p.date + "T00:00:00Z").toLocaleDateString("fr-CA", {
       day: "numeric",
       month: "short",
     }),
     mean: Number(p.ndvi_mean.toFixed(3)),
-    p10: Number(p.ndvi_p10.toFixed(3)),
-    p90: Number(p.ndvi_p90.toFixed(3)),
   }));
+  const sourceLabel =
+    data.meta?.source && data.meta.source !== "synthetic_placeholder"
+      ? `source ${data.meta.source}`
+      : "données de mise en page (régénérer via scripts/export_ndvi_json.py)";
 
   return (
     <div className="chart-wrap">
@@ -91,10 +85,10 @@ export function NdviSeriesChart() {
             ]}
           />
           <ReferenceLine
-            y={THRESHOLD}
+            y={threshold}
             stroke="#dc2626"
             strokeDasharray="4 4"
-            label={{ value: "Seuil 0.30", position: "right", fontSize: 11, fill: "#dc2626" }}
+            label={{ value: `Seuil ${threshold.toFixed(2)}`, position: "right", fontSize: 11, fill: "#dc2626" }}
           />
           <Line
             type="monotone"
@@ -107,8 +101,7 @@ export function NdviSeriesChart() {
         </LineChart>
       </ResponsiveContainer>
       <p className="chart-caption">
-        NDVI = (NIR−R)/(NIR+R) · pixels validés par le masque SCL · source{" "}
-        {data.series[0]?.item_id.slice(0, 12)}…
+        NDVI = (NIR−R)/(NIR+R) · {sourceLabel}
       </p>
     </div>
   );
