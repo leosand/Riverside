@@ -61,7 +61,8 @@ pédagogique « Comprendre ce que vous voyez ».
 
 | Capture | Description |
 |---|---|
-| ![Desktop](docs/screenshots/dashboard-desktop.png) | Vue complète (carte + série + alertes + explainer) |
+| ![Desktop](docs/screenshots/dashboard-desktop.png) | Vue complète (carte + série + alertes + projet + explainer) |
+| ![Projet](docs/screenshots/dashboard-projet.png) | Le projet en bref (problème, solution, pipeline) |
 | ![Alertes](docs/screenshots/dashboard-alertes.png) | Panneau des alertes avec explication |
 | ![Expliquer](docs/screenshots/dashboard-expliquer.png) | Bloc pédagogique (NDVI, seuil, sources) |
 | ![Mobile](docs/screenshots/dashboard-mobile.png) | Vue mobile responsive |

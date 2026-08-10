@@ -83,6 +83,53 @@ export default async function DashboardPage() {
           </div>
         </main>
 
+        {/* Bloc projet / À propos */}
+        <section className="explainer" aria-labelledby="projet-titre">
+          <h2 id="projet-titre">Le projet en bref</h2>
+          <div className="explainer-grid">
+            <div className="explainer-card">
+              <h3>🌊 Le problème</h3>
+              <p>
+                Les berges des Grands Lacs subissent une érosion continue : la montée des
+                eaux, les tempêtes et la perte de végétation menacent les propriétés,
+                la qualité de l'eau et les habitats riverains. Les inspections manuelles
+                sont coûteuses, ponctuelles et ne couvrent qu'une fraction du littoral.
+              </p>
+            </div>
+            <div className="explainer-card">
+              <h3>🛰️ La solution Riverside</h3>
+              <p>
+                <strong>Riverside</strong> automatise la surveillance des berges grâce à
+                l'imagerie satellite gratuite : il détecte les zones sous-végétalisées,
+                suit leur évolution dans le temps, prédit la croissance de la végétation
+                et déclenche des alertes réglementaires avant que l'érosion ne devienne
+                critique — le tout sans déplacement sur le terrain.
+              </p>
+            </div>
+            <div className="explainer-card">
+              <h3>⚙️ Le pipeline de bout en bout</h3>
+              <p>De l'acquisition à l'action, chaque observation traverse 6 étapes :</p>
+              <ol className="explainer-steps">
+                <li><strong>Acquisition</strong> — recherche de scènes Sentinel-2 récentes (STAC Earth Search)</li>
+                <li><strong>Dénuagement</strong> — masque SCL + composite médian temporel</li>
+                <li><strong>Indices</strong> — calcul NDVI (santé végétale) et NDWI (humidité)</li>
+                <li><strong>Historisation</strong> — séries temporelles archivées en base PostGIS</li>
+                <li><strong>Décision</strong> — comparaison au seuil réglementaire + alertes + webhook n8n</li>
+                <li><strong>Prédiction</strong> — modèle LSTM de trajectoire NDVI pour anticiper les brèches de seuil</li>
+              </ol>
+            </div>
+            <div className="explainer-card">
+              <h3>📋 Vers des rapports de conformité</h3>
+              <p>
+                Les observations alimentent des <strong>rapports CSR bilingues</strong> (français/anglais) :
+                synthèse de conformité au seuil, tendance de la végétation, nombre de
+                franchissements — et une rédaction narrative optionnelle générée par un
+                LLM local (Ollama), souveraine et hors-ligne.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Bloc pédagogique / explainer */}
         <section className="explainer" aria-labelledby="expliquer-titre">
           <h2 id="expliquer-titre">Comprendre ce que vous voyez</h2>

@@ -44,3 +44,13 @@ test("le bloc pédagogique explique le projet", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByText("C'est quoi le NDVI")).toBeVisible();
 });
+
+test("la description du projet est complète", async ({ page }) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Le projet en bref" }),
+  ).toBeVisible();
+  await expect(page.getByText("La solution Riverside")).toBeVisible();
+  await expect(page.getByText("Le pipeline de bout en bout")).toBeVisible();
+  await expect(page.getByText("Prédiction", { exact: false })).toBeVisible();
+});
