@@ -137,6 +137,13 @@ toujours le **conteneur** (pas seulement le code local) après un build :
 
 ---
 
+- Ingestion réelle STAC→NDVI (AOI Toronto, 3 scènes, résolution 240 m) :
+  **échec après ~2h45** de téléchargement — `Connection aborted /
+  RemoteDisconnected` (connexion coupée par le réseau en plein chargement,
+  retry tenacity épuisé après 3 tentatives). Aucune donnée persistée.
+  Leçon : pré-télécharger/verrouiller les tuiles COG hors-ligne, ou utiliser un
+  miroir de cache, avant de lancer le pipeline réel.
+
 ## 9. Recommandations pour la prochaine session
 
 1. **Vérifier le réseau d'abord** : `curl -o /dev/null -w "%{speed_download}"` sur
