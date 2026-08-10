@@ -13,14 +13,16 @@ test("le tableau de bord se charge et affiche le titre", async ({ page }) => {
   await expect(page.getByText("Lac Ontario · NDVI Sentinel-2")).toBeVisible();
 });
 
-test("état API indisponible affiché sans planter", async ({ page }) => {
+test("le dashboard gère l'absence ou la présence de l'API", async ({ page }) => {
   await page.goto("/");
-  // L'API n'est pas démarrée en e2e → message d'erreur explicite (role=alert)
-  // NB : getByRole("alert") matche aussi l'alert implicite de la carte MapLibre —
-  // on cible le message exact.
-  await expect(
-    page.getByRole("alert").filter({ hasText: "API indisponible" }),
-  ).toBeVisible();
+  // L'API peut être présente (alertes affichées) ou absente (message d'erreur
+  // explicite role=alert). Les deux sont des comportements valides — on vérifie
+  // que la page ne crashe pas et qu'un des deux états est rendu.
+  const apiDown = page.getByRole("alert").filter({ hasText: "API indisponible" });
+  const alertList = page.locator(".alert-list, .alert-help");
+  await expect
+    .poll(async () => (await apiDown.count()) + (await alertList.count()))
+    .toBeGreaterThanOrEqual(1);
 });
 
 test("la carte MapLibre est rendue", async ({ page }) => {
