@@ -114,8 +114,19 @@ Déploiement :
 ```bash
 cp .env.example .env          # ajustez DATABASE_URL / secrets
 docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --build
-curl http://localhost:8001/health
+curl http://localhost:8001/health          # API
+cd web && NEXT_PUBLIC_API_URL=http://localhost:8001 npm run build
+cd web && NEXT_PUBLIC_API_URL=http://localhost:8001 npx next start -p 3101   # frontend
 ```
+
+**URLs du dashboard** :
+- Frontend (dashboard visuel) : http://localhost:3101
+- API (OpenAPI) : http://localhost:8001/docs
+- n8n : http://localhost:5679
+
+> NB : l'URL racine de l'API (`:8001/`) renvoie `{"detail":"Not Found"}` — c'est
+> le comportement normal de FastAPI (pas de route `/`). Le dashboard visuel est
+> servi par le frontend Next.js sur `:3101`, qui appelle l'API sur `:8001`.
 
 **Corrections apportées au cours du déploiement réel** :
 - `Dockerfile` : `pip install` avec `--retries 5 --timeout 300` — le build
