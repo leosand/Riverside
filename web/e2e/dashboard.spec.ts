@@ -9,7 +9,8 @@ import { test, expect } from "@playwright/test";
 
 test("le tableau de bord se charge et affiche le titre", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Alertes ouvertes" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Surveillance des berges" })).toBeVisible();
+  await expect(page.getByText("Lac Ontario · NDVI Sentinel-2")).toBeVisible();
 });
 
 test("état API indisponible affiché sans planter", async ({ page }) => {
@@ -24,5 +25,14 @@ test("état API indisponible affiché sans planter", async ({ page }) => {
 
 test("la carte MapLibre est rendue", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator('[role="application"][aria-label="Carte des berges surveillées"]')).toBeVisible();
+  await expect(
+    page.locator('[role="application"][aria-label="Carte des berges surveillées (lac Ontario)"]'),
+  ).toBeVisible();
+});
+
+test("le panneau des alertes réglementaires est présent", async ({ page }) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Alertes réglementaires" }),
+  ).toBeVisible();
 });

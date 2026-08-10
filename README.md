@@ -31,7 +31,7 @@ API FastAPI v0.3 — src/api/main.py (RFC 7807)
 Frontend Next.js + MapLibre — web/ (SSR, SEO/AEO, a11y)
 ```
 
-Docs : [Architecture](docs/ARCHITECTURE.md) · [V&V](docs/VV.md) · OpenAPI : `/docs` sur l'API.
+Docs : [Architecture](docs/ARCHITECTURE.md) · [V&V](docs/VV.md) · [Difficultés de session](docs/SESSION-DIFFICULTES.md) · OpenAPI : `/docs` sur l'API.
 
 ## GitHub Reference Audit (choix d'adoption)
 

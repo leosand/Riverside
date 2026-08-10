@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import "./dashboard.css";
 
 // SEO/AEO : métadonnées dynamiques FR-CA / dynamic FR-CA metadata
 export const metadata: Metadata = {
