@@ -7,6 +7,9 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./e2e",
+  // Tests de démonstration locale (dépendent de l'API + données en base) :
+  // exclus de la CI, exécutés via playwright.screenshots.config.ts
+  testIgnore: /(live|verify|screenshots)\.spec\.ts/,
   fullyParallel: true,
   retries: 0,
   reporter: [["list"]],
