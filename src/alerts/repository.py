@@ -41,6 +41,15 @@ alerts_table = Table(
     Column("acknowledged", Boolean, nullable=False, default=False),
 )
 
+# Table aoi (référence) — JOIN pour afficher un nom lisible au lieu de l'UUID.
+# EN: aoi reference table — JOIN to expose a readable name instead of the UUID.
+aoi_table = Table(
+    "aoi",
+    metadata,
+    Column("id", String(36), primary_key=True),
+    Column("name", String(128), nullable=False),
+)
+
 
 def save_alert(engine: Engine, aoi_id: str | UUID, decision: AlertDecision) -> str:
     """Insère une alerte en transaction / transactional insert, returns id."""
@@ -67,7 +76,10 @@ def list_open_alerts(
 ) -> list[dict[str, Any]]:
     """Alertes non acquittées, plus récentes d'abord / unacknowledged alerts."""
     stmt = (
-        select(alerts_table)
+        select(alerts_table, aoi_table.c.name.label("aoi_name"))
+        .select_from(
+            alerts_table.outerjoin(aoi_table, alerts_table.c.aoi_id == aoi_table.c.id)
+        )
         .where(alerts_table.c.acknowledged.is_(False))
         .order_by(alerts_table.c.raised_at.desc())
         .limit(limit)
@@ -75,7 +87,12 @@ def list_open_alerts(
     if aoi_id is not None:
         stmt = stmt.where(alerts_table.c.aoi_id == str(aoi_id))
     with engine.connect() as conn:
-        return [dict(row._mapping) for row in conn.execute(stmt)]
+        rows = [dict(row._mapping) for row in conn.execute(stmt)]
+    # Fallback : nom inconnu → UUID tronqué (tests SQLite sans table aoi)
+    for r in rows:
+        if not r.get("aoi_name"):
+            r["aoi_name"] = str(r["aoi_id"])[:8]
+    return rows
 
 
 def acknowledge_alert(engine: Engine, alert_id: str) -> bool:

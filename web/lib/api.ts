@@ -6,6 +6,7 @@
 export interface Alert {
   id: string;
   aoi_id: string;
+  aoi_name?: string;
   raised_at: string;
   metric: string;
   value: number;

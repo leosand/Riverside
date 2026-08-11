@@ -69,7 +69,9 @@ export function AlertPanel({ alerts, error }: { alerts: Alert[]; error: string |
             </div>
 
             <p className="alert-explain">{SEVERITY_EXPLAIN[a.severity]}</p>
-            <p className="alert-aoi">Zone surveillée : {a.aoi_id}</p>
+            <p className="alert-aoi">
+              Zone surveillée : {a.aoi_name ?? a.aoi_id.slice(0, 8) + "…"}
+            </p>
           </li>
         );
       })}
