@@ -14,7 +14,7 @@ function statusOf(mean: number): { label: string; className: string } {
 }
 
 /** Tableau d'évolution NDVI documenté / documented NDVI evolution table. */
-export function NdviTable({ aoiId, months = 6 }: { aoiId: string; months?: number }) {
+export function NdviTable({ aoiId, months = 12 }: { aoiId: string; months?: number }) {
   const [points, setPoints] = useState<NdviSeriesPoint[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);

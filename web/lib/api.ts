@@ -63,10 +63,10 @@ export interface NdviSeriesResponse {
   series: NdviSeriesPoint[];
 }
 
-/** Série temporelle NDVI d'une AOI sur les N derniers mois (défaut 6). */
+/** Série temporelle NDVI d'une AOI sur les N derniers mois (défaut 12). */
 export async function fetchNdviSeries(
   aoiId: string,
-  months = 6,
+  months = 12,
 ): Promise<NdviSeriesResponse> {
   const res = await fetch(
     `${API_URL}/api/v1/ndvi/series?aoi_id=${encodeURIComponent(aoiId)}&months=${months}`,

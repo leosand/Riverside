@@ -78,18 +78,18 @@ export default async function DashboardPage() {
         <div className="data-row">
           <section className="panel" aria-labelledby="serie-titre">
             <div className="panel-head">
-              <h2 id="serie-titre">Évolution NDVI — 6 derniers mois</h2>
+              <h2 id="serie-titre">Évolution NDVI — 12 derniers mois</h2>
               <span className="legend-note">Temps réel · fenêtre glissante · API /api/v1/ndvi/series</span>
             </div>
-            <NdviSeriesChart aoiId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" months={6} />
+            <NdviSeriesChart aoiId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" months={12} />
           </section>
 
           <section className="panel" aria-labelledby="table-titre">
             <div className="panel-head">
-              <h2 id="table-titre">Tableau d'évolution NDVI — 6 derniers mois</h2>
+              <h2 id="table-titre">Tableau d'évolution NDVI — 12 derniers mois</h2>
               <span className="legend-note">Données réelles · fenêtre glissante · API /api/v1/ndvi/series</span>
             </div>
-            <NdviTable aoiId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" months={6} />
+            <NdviTable aoiId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" months={12} />
           </section>
         </div>
 

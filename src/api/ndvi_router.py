@@ -3,7 +3,7 @@
 EN: NDVI time-series router. Exposes the historical NDVI series of an AOI to
 the dashboard (graphique « Évolution NDVI »). Lit la table ndvi_series (source
 de vérité : migration 001). Fenêtre glissante : `months` limite aux N derniers
-mois (défaut 6) — le dashboard s'ajuste automatiquement aux données récentes.
+mois (défaut 12) — le dashboard s'ajuste automatiquement aux données récentes.
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/api/v1/ndvi", tags=["ndvi"])
 @router.get("/series")
 def ndvi_series(
     aoi_id: Annotated[UUID, Query(description="UUID de l'AOI")],
-    months: Annotated[int, Query(ge=1, le=24, description="Fenêtre glissante (mois)")] = 6,
+    months: Annotated[int, Query(ge=1, le=24, description="Fenêtre glissante (mois)")] = 12,
     limit: Annotated[int, Query(ge=1, le=1000)] = 200,
 ) -> dict[str, Any]:
     """Série temporelle NDVI d'une AOI sur les N derniers mois.

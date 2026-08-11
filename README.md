@@ -129,7 +129,7 @@ Détails dans [docs/VV.md](docs/VV.md).
 | POST | `/api/v1/alerts/evaluate` | Évalue NDVI vs seuil → persiste + notifie si critique |
 | GET | `/api/v1/alerts/open` | Alertes non acquittées |
 | POST | `/api/v1/alerts/{id}/acknowledge` | Acquitte une alerte (404 sinon) |
-| GET | `/api/v1/ndvi/series?aoi_id=` | Série temporelle NDVI d'une AOI (évolution, p10–p90, NDWI) |
+| GET | `/api/v1/ndvi/series?aoi_id=&months=12` | Série temporelle NDVI d'une AOI — fenêtre glissante (défaut 12 mois) |
 | GET | `/api/v1/reports/csr?aoi_id=` | Rapport CSR bilingue (contexte factuel + narrative Ollama optionnelle) |
 
 ## Sécurité & conformité

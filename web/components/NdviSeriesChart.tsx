@@ -17,7 +17,7 @@ const DEFAULT_THRESHOLD = 0.3;
 const REFRESH_MS = 15_000; // rafraîchissement temps réel / live refresh
 
 /** Série temporelle NDVI — alimentée par l'API, rafraîchie en temps réel. */
-export function NdviSeriesChart({ aoiId, months = 6 }: { aoiId: string; months?: number }) {
+export function NdviSeriesChart({ aoiId, months = 12 }: { aoiId: string; months?: number }) {
   const [data, setData] = useState<NdviSeriesResponse | null>(null);
   const [loadError, setLoadError] = useState(false);
 

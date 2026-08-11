@@ -37,6 +37,7 @@ les 22 tests d'origine.
 | Contrat STAC (réponse Earth Search mockée) | `tests/test_stac_contract.py` (`responses`) | ✅ PASS |
 | Parcours frontend complet (SSR, erreur API, carte) | `web/e2e/dashboard.spec.ts` (Playwright chromium) | ✅ PASS |
 | Intégration STAC réelle (Earth Search) | `tests/test_stac_live.py` (marker `integration`, hors CI) | ✅ PASS (réseau OK) |
+| Série NDVI fenêtre glissante (12 mois) | `tests/test_ndvi_router.py::test_ndvi_series_months_window` | ✅ PASS |
 
 **Totaux mesurés** : 34 tests pytest · 3 tests Playwright · 1 test STAC live ·
 0 échoué · 5 erreurs de lint corrigées · 1 erreur de dépendance npm corrigée
