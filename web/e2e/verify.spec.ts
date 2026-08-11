@@ -1,24 +1,28 @@
 import { test, expect } from "@playwright/test";
 
-/** Vérification : fenêtre 6 mois, graphique + tableau alignés sur les données réelles. */
-test("les panneaux affichent les 12 derniers mois en temps réel", async ({ page }) => {
+/** Vérification : alertes au format professionnel (jauge + AOI complet). */
+test("les alertes affichent le format professionnel", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   await page.waitForTimeout(3000);
 
-  // Titres avec fenêtre glissante
-  await expect(page.getByRole("heading", { name: "Évolution NDVI — 12 derniers mois", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Tableau d'évolution NDVI — 12 derniers mois" })).toBeVisible();
+  const alertItem = page.locator(".alert-item").first();
+  await expect(alertItem).toBeVisible();
 
-  // Graphique (SVG)
-  await expect(page.locator(".data-row .recharts-wrapper svg")).toHaveCount(1);
+  // Métrique avec séparateur seuil
+  const metric = await alertItem.locator(".alert-metric-row").textContent();
+  expect(metric).toContain("NDVI moyen");
+  expect(metric).toContain("/ seuil");
 
-  // Tableau : 8 lignes (données des 12 derniers mois en base)
-  const rows = await page.locator(".ndvi-table tbody tr").count();
-  expect(rows).toBeGreaterThanOrEqual(7);
+  // Jauge de progression
+  const gauge = alertItem.locator(".alert-gauge-fill");
+  await expect(gauge).toBeVisible();
+  const fillWidth = await gauge.getAttribute("style");
+  expect(fillWidth).toContain("width");
 
-  // Fenêtre indiquée dans la légende du graphique
-  const caption = await page.locator(".chart-caption").first().textContent();
-  expect(caption).toContain("12 derniers mois");
+  // Explication + zone complète (UUID entier)
+  await expect(alertItem.locator(".alert-explain")).toContainText("Végétation très dégradée");
+  const aoi = await alertItem.locator(".alert-aoi").textContent();
+  expect(aoi).toContain("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
-  console.log("FENETRE12_OK:", { lignes: rows, caption: caption?.slice(0, 70) });
+  console.log("ALERTES_PRO_OK:", { metrique: metric?.trim().slice(0, 40), jauge: fillWidth?.slice(0, 30) });
 });
