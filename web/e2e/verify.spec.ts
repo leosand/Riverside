@@ -1,23 +1,26 @@
 import { test, expect } from "@playwright/test";
 
-/**
- * Vérification du rendu : le tableau d'évolution NDVI est présent.
- * EN: Rendering check — NDVI table present. Résilient : tolère l'absence
- * d'API (en CI, le tableau affiche l'état vide documenté au lieu de crasher).
- */
-test("le tableau d'évolution NDVI est présent", async ({ page }) => {
+/** Vérification du layout : graphique + tableau côte à côte, données API. */
+test("graphique et tableau côte à côte avec données temps réel", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  await page.waitForTimeout(2500);
+  await page.waitForTimeout(3000);
 
-  // Le panneau du tableau existe toujours
-  const panel = page.locator(".panel").filter({ hasText: "Tableau d'évolution" });
-  await expect(panel).toBeVisible();
-  await expect(
-    panel.getByRole("heading", { name: "Tableau d'évolution NDVI" }),
-  ).toBeVisible();
+  // Les deux panneaux sont côte à côte dans .data-row
+  const dataRow = page.locator(".data-row");
+  await expect(dataRow).toBeVisible();
+  const panels = await dataRow.locator("> section.panel").count();
+  expect(panels).toBe(2);
 
-  // Soit des lignes de données (API up), soit un état vide documenté (API down)
-  const rows = await panel.locator(".ndvi-table tbody tr").count();
-  const emptyState = await panel.locator(".empty-state").count();
-  expect(rows >= 1 || emptyState >= 1).toBeTruthy();
+  // Graphique (SVG recharts)
+  await expect(page.locator(".data-row .recharts-wrapper svg")).toHaveCount(1);
+
+  // Tableau avec lignes de données
+  const rows = await page.locator(".ndvi-table tbody tr").count();
+  expect(rows).toBeGreaterThanOrEqual(7);
+
+  // Indicateur de mise à jour temps réel
+  const caption = await page.locator(".ndvi-table ~ .chart-caption, .chart-caption").last().textContent();
+  expect(caption).toContain("mise à jour");
+
+  console.log("LAYOUT_OK:", { panneaux: panels, lignes: rows, caption: caption?.slice(0, 80) });
 });

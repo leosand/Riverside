@@ -63,6 +63,7 @@ pédagogique « Comprendre ce que vous voyez ».
 |---|---|
 | ![Desktop](docs/screenshots/dashboard-desktop.png) | Vue complète (carte + série + tableau + alertes + projet + explainer) |
 | ![Tableau](docs/screenshots/dashboard-tableau.png) | Tableau d'évolution NDVI (données de l'API) |
+| ![Données](docs/screenshots/dashboard-donnees.png) | Graphique + tableau côte à côte (temps réel) |
 | ![Projet](docs/screenshots/dashboard-projet.png) | Le projet en bref (problème, solution, pipeline) |
 | ![Alertes](docs/screenshots/dashboard-alertes.png) | Panneau des alertes avec explication |
 | ![Expliquer](docs/screenshots/dashboard-expliquer.png) | Bloc pédagogique (NDVI, seuil, sources) |

@@ -72,3 +72,11 @@ export async function fetchNdviSeries(aoiId: string): Promise<NdviSeriesResponse
   }
   return (await res.json()) as NdviSeriesResponse;
 }
+
+/** Formate une date ISO (YYYY-MM-DD) sans décalage de fuseau horaire.
+ * EN: Format an ISO date without timezone shift (avoids off-by-one day). */
+export function formatIsoDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const months = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+  return `${d} ${months[(m ?? 1) - 1]} ${y}`;
+}

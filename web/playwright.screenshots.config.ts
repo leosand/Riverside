@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 /** Config captures d'écran — réutilise le serveur Next.js déjà lancé sur :3101. */
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: /(screenshots|verify|dashboard)\.spec\.ts/,
+  testMatch: /(screenshots|verify|dashboard|live)\.spec\.ts/,
   fullyParallel: false,
   workers: 1,
   reporter: [["list"]],

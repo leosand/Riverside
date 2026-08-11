@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchNdviSeries, type NdviSeriesPoint } from "@/lib/api";
+import { fetchNdviSeries, formatIsoDate, type NdviSeriesPoint } from "@/lib/api";
 
 const THRESHOLD = 0.3;
+const REFRESH_MS = 15_000; // rafraîchissement temps réel / live refresh
 
 /** Statut d'un point vs seuil réglementaire / compliance status vs threshold. */
 function statusOf(mean: number): { label: string; className: string } {
@@ -16,11 +17,28 @@ function statusOf(mean: number): { label: string; className: string } {
 export function NdviTable({ aoiId }: { aoiId: string }) {
   const [points, setPoints] = useState<NdviSeriesPoint[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   useEffect(() => {
-    fetchNdviSeries(aoiId)
-      .then((d) => setPoints(d.series))
-      .catch((e: Error) => setError(e.message));
+    let cancelled = false;
+    const load = () =>
+      fetchNdviSeries(aoiId)
+        .then((d) => {
+          if (!cancelled) {
+            setPoints(d.series);
+            setLastUpdate(new Date());
+            setError(null);
+          }
+        })
+        .catch((e: Error) => {
+          if (!cancelled) setError(e.message);
+        });
+    load();
+    const timer = setInterval(load, REFRESH_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
   }, [aoiId]);
 
   if (error !== null) {
@@ -60,13 +78,7 @@ export function NdviTable({ aoiId }: { aoiId: string }) {
             const st = statusOf(p.ndvi_mean);
             return (
               <tr key={p.date}>
-                <td>
-                  {new Date(p.date + "T00:00:00Z").toLocaleDateString("fr-CA", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
+                <td>{formatIsoDate(p.date)}</td>
                 <td className="num">{p.ndvi_mean.toFixed(3)}</td>
                 <td className="num">
                   {p.ndvi_p10 !== null && p.ndvi_p90 !== null
@@ -87,6 +99,17 @@ export function NdviTable({ aoiId }: { aoiId: string }) {
       <p className="chart-caption">
         NDWI &lt; 0 = surface humide (eau/berge saturée) · p10–p90 = variabilité
         spatiale des pixels · seuil réglementaire 0.30
+        {lastUpdate !== null && (
+          <>
+            {" "}
+            · mise à jour{" "}
+            {lastUpdate.toLocaleTimeString("fr-CA", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })}
+          </>
+        )}
       </p>
     </div>
   );

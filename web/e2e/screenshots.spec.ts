@@ -15,13 +15,15 @@ test("captures du dashboard (desktop + mobile)", async ({ page }) => {
   await page.waitForTimeout(1000);
   await page.locator(".dashboard-header").screenshot({ path: "../docs/screenshots/dashboard-header.png" });
 
-  // 3) Alertes
-  await page.locator(".side-column").screenshot({ path: "../docs/screenshots/dashboard-alertes.png" });
+  // 3) Rangée données (graphique + tableau côte à côte)
+  const dataRow = page.locator(".data-row");
+  await expect(dataRow).toBeVisible();
+  await dataRow.screenshot({ path: "../docs/screenshots/dashboard-donnees.png" });
 
-  // 4) Tableau d'évolution NDVI
-  const tablePanel = page.locator(".panel").filter({ hasText: "Tableau d'évolution" });
-  await expect(tablePanel).toBeVisible();
-  await tablePanel.screenshot({ path: "../docs/screenshots/dashboard-tableau.png" });
+  // 4) Alertes
+  const alertPanel = page.locator(".panel").filter({ hasText: "Alertes réglementaires" });
+  await expect(alertPanel).toBeVisible();
+  await alertPanel.screenshot({ path: "../docs/screenshots/dashboard-alertes.png" });
 
   // 5) Bloc projet
   const projet = page.locator(".explainer").first();

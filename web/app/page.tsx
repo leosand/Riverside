@@ -56,7 +56,7 @@ export default async function DashboardPage() {
         </header>
 
         <main className="dashboard-grid">
-          {/* Carte NDVI */}
+          {/* Carte NDVI + alertes */}
           <section className="panel panel-map" aria-labelledby="carte-titre">
             <div className="panel-head">
               <h2 id="carte-titre">Carte NDVI — zone surveillée</h2>
@@ -65,32 +65,33 @@ export default async function DashboardPage() {
             <NdviMap />
           </section>
 
-          {/* Colonne droite : série temporelle + alertes */}
-          <div className="side-column">
-            <section className="panel" aria-labelledby="serie-titre">
-              <div className="panel-head">
-                <h2 id="serie-titre">Évolution NDVI (juin–juil. 2026)</h2>
-              </div>
-              <NdviSeriesChart />
-            </section>
-
-            <section className="panel" aria-labelledby="table-titre">
-              <div className="panel-head">
-                <h2 id="table-titre">Tableau d'évolution NDVI</h2>
-                <span className="legend-note">Données réelles · API /api/v1/ndvi/series</span>
-              </div>
-              <NdviTable aoiId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" />
-            </section>
-
-            <section className="panel" aria-labelledby="alertes-titre">
-              <div className="panel-head">
-                <h2 id="alertes-titre">Alertes réglementaires</h2>
-                <span className="badge">{alerts.length}</span>
-              </div>
-              <AlertPanel alerts={alerts} error={error} />
-            </section>
-          </div>
+          <section className="panel" aria-labelledby="alertes-titre">
+            <div className="panel-head">
+              <h2 id="alertes-titre">Alertes réglementaires</h2>
+              <span className="badge">{alerts.length}</span>
+            </div>
+            <AlertPanel alerts={alerts} error={error} />
+          </section>
         </main>
+
+        {/* Rangée données : graphique + tableau côte à côte */}
+        <div className="data-row">
+          <section className="panel" aria-labelledby="serie-titre">
+            <div className="panel-head">
+              <h2 id="serie-titre">Évolution NDVI (juin–août 2026)</h2>
+              <span className="legend-note">Temps réel · API /api/v1/ndvi/series</span>
+            </div>
+            <NdviSeriesChart aoiId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" />
+          </section>
+
+          <section className="panel" aria-labelledby="table-titre">
+            <div className="panel-head">
+              <h2 id="table-titre">Tableau d'évolution NDVI</h2>
+              <span className="legend-note">Données réelles · API /api/v1/ndvi/series</span>
+            </div>
+            <NdviTable aoiId="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" />
+          </section>
+        </div>
 
         {/* Bloc projet / À propos */}
         <section className="explainer" aria-labelledby="projet-titre">

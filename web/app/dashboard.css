@@ -63,6 +63,15 @@
   align-items: start;
 }
 
+/* Rangée données : graphique + tableau côte à côte */
+.data-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+  align-items: start;
+}
+
 .side-column {
   display: grid;
   gap: 1.25rem;
@@ -197,6 +206,9 @@
 
 @media (max-width: 900px) {
   .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .data-row {
     grid-template-columns: 1fr;
   }
   .ndvi-map {
