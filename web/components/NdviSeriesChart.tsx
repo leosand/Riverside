@@ -17,14 +17,14 @@ const DEFAULT_THRESHOLD = 0.3;
 const REFRESH_MS = 15_000; // rafraîchissement temps réel / live refresh
 
 /** Série temporelle NDVI — alimentée par l'API, rafraîchie en temps réel. */
-export function NdviSeriesChart({ aoiId }: { aoiId: string }) {
+export function NdviSeriesChart({ aoiId, months = 6 }: { aoiId: string; months?: number }) {
   const [data, setData] = useState<NdviSeriesResponse | null>(null);
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     const load = () =>
-      fetchNdviSeries(aoiId)
+      fetchNdviSeries(aoiId, months)
         .then((d) => {
           if (!cancelled) {
             setData(d);
@@ -40,7 +40,7 @@ export function NdviSeriesChart({ aoiId }: { aoiId: string }) {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [aoiId]);
+  }, [aoiId, months]);
 
   if (loadError) {
     return (
@@ -104,7 +104,7 @@ export function NdviSeriesChart({ aoiId }: { aoiId: string }) {
       </ResponsiveContainer>
       <p className="chart-caption">
         Dernière observation : {last.date} · NDVI {last.ndvi_mean.toFixed(3)} ·
-        mise à jour toutes les 15 s · API /api/v1/ndvi/series
+        fenêtre {months} derniers mois · mise à jour toutes les 15 s · API /api/v1/ndvi/series
       </p>
     </div>
   );

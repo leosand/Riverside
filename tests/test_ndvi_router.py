@@ -62,3 +62,26 @@ def test_ndvi_series_invalid_uuid_422(tmp_path, monkeypatch) -> None:
     client = TestClient(app)
     r = client.get("/api/v1/ndvi/series?aoi_id=pas-un-uuid")
     assert r.status_code == 422  # validation pydantic UUID
+
+
+def test_ndvi_series_months_window(tmp_path, monkeypatch) -> None:
+    """La fenêtre glissante filtre les observations hors des N derniers mois."""
+    url = f"sqlite:///{tmp_path}/ndvi_months.db"
+    monkeypatch.setattr(settings, "database_url", url)
+    get_engine.cache_clear()
+    engine = get_engine()
+    metadata.create_all(engine)
+    # Points récents (dans la fenêtre 6 mois)
+    save_ndvi_series(engine, AOI, date(2026, 7, 1), {"ndvi_mean": 0.42})
+    save_ndvi_series(engine, AOI, date(2026, 7, 15), {"ndvi_mean": 0.58})
+    # Point ancien (hors fenêtre 6 mois depuis 2026-08)
+    save_ndvi_series(engine, AOI, date(2025, 1, 10), {"ndvi_mean": 0.30})
+
+    client = TestClient(app)
+    r = client.get(f"/api/v1/ndvi/series?aoi_id={AOI}&months=6")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["months"] == 6
+    # Seuls les 2 points de juillet 2026 sont dans la fenêtre
+    assert body["count"] == 2
+    assert all(p["date"].startswith("2026-07") for p in body["series"])

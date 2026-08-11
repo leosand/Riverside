@@ -14,7 +14,7 @@ function statusOf(mean: number): { label: string; className: string } {
 }
 
 /** Tableau d'évolution NDVI documenté / documented NDVI evolution table. */
-export function NdviTable({ aoiId }: { aoiId: string }) {
+export function NdviTable({ aoiId, months = 6 }: { aoiId: string; months?: number }) {
   const [points, setPoints] = useState<NdviSeriesPoint[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
@@ -22,7 +22,7 @@ export function NdviTable({ aoiId }: { aoiId: string }) {
   useEffect(() => {
     let cancelled = false;
     const load = () =>
-      fetchNdviSeries(aoiId)
+      fetchNdviSeries(aoiId, months)
         .then((d) => {
           if (!cancelled) {
             setPoints(d.series);
@@ -39,7 +39,7 @@ export function NdviTable({ aoiId }: { aoiId: string }) {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [aoiId]);
+  }, [aoiId, months]);
 
   if (error !== null) {
     return (
