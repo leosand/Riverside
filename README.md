@@ -8,7 +8,7 @@
 
 ## Contexte / Context
 
-Inspiré du concept **RiverRise** (ThinkBotics, Team 29) : les inspections manuelles des berges du bassin des Grands Lacs sont coûteuses et peu fréquentes. Riverside automatise le suivi de la couverture végétale (NDVI) à partir d'images Sentinel-2 gratuites, détecte les zones sous-restaurées et érodables, prédit la croissance de la végétation et notifie tout dépassement de seuil réglementaire CSR.
+Les inspections manuelles des berges du bassin des Grands Lacs sont coûteuses et peu fréquentes. Riverside automatise le suivi de la couverture végétale (NDVI) à partir d'images Sentinel-2 gratuites, détecte les zones sous-restaurées et érodables, prédit la croissance de la végétation et notifie tout dépassement de seuil réglementaire CSR.
 
 ## Architecture
 
