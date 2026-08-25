@@ -81,8 +81,6 @@ docker compose ps             # vérifier le statut (healthy)
 
 **Ports exposés** (config par défaut) : API `:8000`, PostGIS `:5432`, n8n `:5678`.
 
-> ⚠️ Sur cette machine de dev, les ports `5432`/`3000`/`8000` sont occupés par
-> d'autres projets (towncenter, un uvicorn backend). Le fichier
 > `docker-compose.override.yml` mappe donc Riverside sur des ports dédiés :
 > **API `:8001`**, PostGIS `:5433`, n8n `:5679**. Utilisez-le avec :
 > `docker compose -f docker-compose.yml -f docker-compose.override.yml up -d`
