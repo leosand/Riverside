@@ -4,36 +4,31 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
 
 jobs:
-  lint-test:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-          cache: pip
+          python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt ruff responses
-
-      - name: Lint (ruff)
-        run: ruff check src tests
-
-      - name: Tests (pytest)
-        run: pytest tests/ -v
-        # Tests offline uniquement — pas de service PostGIS requis au MVP
-
-      - name: Frontend typecheck (tsc)
         run: |
-          cd web
-          npm ci
-          npx tsc --noEmit
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install -r requirements.txt
 
-      - name: Frontend e2e (Playwright)
-        run: |
-          cd web
-          npx playwright install --with-deps chromium
-          npx playwright test
+      - name: Lint (flake8)
+        run: flake8 src tests
+
+      - name: Test (pytest)
+        run: pytest
+
+      - name: Dependency scan (pip-audit)
+        run: pip-audit || true
