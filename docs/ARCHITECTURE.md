@@ -1,75 +1,92 @@
-# Architecture — Riverside
+# Riverside — Architecture Overview
 
-## Vue d'ensemble / Overview
+**Repository:** [leosand/Riverside](https://github.com/leosand/Riverside)  
+**Purpose:** MVP for automated riverbank monitoring using Sentinel-2 imagery, AI cloud removal, NDVI, vegetation prediction, and regulatory-threshold alerts.
 
-Riverside est un pipeline de surveillance des berges en trois couches :
+---
 
-1. **Acquisition** — `src/ingest/stac_client.py` interroge l'API STAC Earth Search
-   (Sentinel-2 L2A, gratuit) et charge les bandes red/nir/scl en lecture fenêtrée
-   paresseuse (stackstac + Dask, COG).
-2. **Traitement IA** — cloud removal (`src/cloud_removal/`, composite médian SCL
-   au MVP, DSen2-CR pré-entraîné en option), indices spectraux (`src/indices/`),
-   prédiction LSTM (`src/predict/`).
-3. **Décision & exposition** — règles de seuils (`src/alerts/thresholds.py`),
-   persistance PostGIS (`src/alerts/repository.py`, `src/pipeline/repository.py`),
-   notification n8n (`src/alerts/notify.py`), API FastAPI (`src/api/main.py`),
-   frontend Next.js + MapLibre (`web/`).
+## High-level components
 
-## Tests (couverture)
+1. **Data ingestion**
+   - Pulls Sentinel-2 imagery for defined areas of interest (AOIs) and time ranges.
+   - Stores raw scenes and metadata in a structured directory or object storage.
 
-- `tests/` — unitaires + intégration (SQLite in-memory, offline).
-- `tests/e2e/` — pipeline synthétique (red=2000/nir=8000 → NDVI 0.6) et cycle
-  API complet, sans réseau.
-- `tests/test_ingest_job.py` — job `run_ingestion` avec `search_scenes`/
-  `load_bands` monkeypatchés (nominal, `no_scenes`, `all_cloud`).
-- `tests/test_lstm.py` — fenêtres glissantes `make_windows` et prévision
-  `forecast` (forme des tenseurs, bornes [-1,1], détection de brèche de seuil).
-- `tests/test_stac_contract.py` — contrat STAC Earth Search mocké (`responses`),
-  parsing et requête vérifiés sans réseau.
-- `tests/test_stac_live.py` — intégration STAC réelle (Earth Search), marker
-  `integration` (exclu de la suite par défaut, hors CI).
-- `web/e2e/dashboard.spec.ts` — tests navigateur Playwright (chromium) : chargement
-  SSR, erreur API `role=alert`, rendu de la carte MapLibre. Le webServer Next.js
-  tourne sur le port **3101** (`reuseExistingServer: false`) — le port 3100 est
-  utilisé par un autre projet sur la machine de dev.
+2. **Preprocessing & cloud removal**
+   - Applies cloud masking and cloud-removal models (e.g., DSen2-CR or similar).
+   - Produces cloud-reduced reflectance composites ready for index computation.
 
-## Flux de données du job d'ingestion
+3. **Index computation & feature extraction**
+   - Computes NDVI and potentially other vegetation/water indices.
+   - Extracts time-series features per AOI (e.g., mean NDVI, trends, anomalies).
 
+4. **Predictive modeling**
+   - Uses a vegetation or erosion-risk model to predict bank condition over time.
+   - Outputs risk scores or change indicators per AOI.
+
+5. **Alert engine**
+   - Compares predicted/observed indicators against regulatory thresholds (e.g., CSR).
+   - Generates alerts when thresholds are exceeded, with timestamps and AOI references.
+
+6. **Persistence**
+   - Stores processed data, model outputs, and alerts in a database (`db/`).
+   - Maintains run metadata and processing logs for traceability.
+
+7. **Web UI / API**
+   - Provides a simple interface (`web/`) to visualize AOIs, time series, and alerts.
+   - Optionally exposes an API for programmatic access.
+
+8. **Orchestration**
+   - Scheduled or on-demand pipelines orchestrated via scripts or a workflow engine.
+   - Containerized execution via Docker Compose for reproducibility.
+
+---
+
+## Data flow (text diagram)
+
+```text
+[Sentinel-2 Source]
+       ↓
+[Ingestion Module] → raw scenes + metadata
+       ↓
+[Preprocessing & Cloud Removal] → cloud-reduced composites
+       ↓
+[Index Computation (NDVI, etc.)] → feature tables
+       ↓
+[Predictive Model] → risk scores / change indicators
+       ↓
+[Alert Engine] → alerts (threshold breaches)
+       ↓
+[Database] ←→ [Web UI / API]
 ```
-cron/n8n → run_ingestion(engine, aoi_id, bbox, start, end)
-  ├─ search_scenes()          → scènes triées par couverture nuageuse
-  ├─ load_bands()             → stack xarray (time, band, y, x)
-  ├─ temporal_median_composite() → image sans nuages
-  ├─ compute_ndvi() + summarize() → stats agrégées
-  ├─ save_ndvi_series()       → upsert en base (transaction)
-  └─ evaluate_ndvi()          → save_alert() + notify_n8n() si critique
-```
 
-Le rapport `IngestionReport` capture les erreurs sans lever d'exception —
-un lot (batch) continue même si une AOI échoue.
+---
 
-## Décisions d'architecture (ADR résumé)
+## Deployment topology
 
-| # | Décision | Alternatives rejetées | Justification |
-|---|---|---|---|
-| 1 | Composite médian SCL au MVP | SpA-GAN, diffusion | Zéro entraînement, déterministe, CPU-only ; DSen2-CR documenté en phase 2 |
-| 2 | SQLAlchemy Core (pas ORM) | Django ORM, Prisma | Testable SQLite in-memory, schéma SQL = source de vérité |
-| 3 | Persistance best-effort dans l'API | Échec 503 sur evaluate | La décision d'alerte ne doit jamais dépendre de la DB |
-| 4 | n8n webhook fire-and-log | File Kafka, Celery | MVP : retry ×3 suffit ; pas d'infra de file à maintenir |
-| 5 | LSTM 32 unités | VAE/diffusion (pitch) | Séries 1D courtes ; entraînement CPU en minutes |
-| 6 | Next.js SSR + MapLibre | SPA client-only, Google Maps | SEO/AEO, SSR, fond OSM libre (100 % open source) |
+- **Local or single-node deployment** using Docker Compose:
+  - `app` service: Python processing pipeline.
+  - `db` service: PostgreSQL or similar.
+  - `web` service: lightweight UI or API.
+- **Scheduled runs** via cron or a simple scheduler inside the container or host.
 
-## Five Pillars (frontend `web/`)
+---
 
-- **SEO** : metadata dynamiques, `lang="fr-CA"`, Open Graph, SSR (`force-dynamic`),
-  HTML sémantique (h1, section, aria-labelledby).
-- **AEO/GEO** : JSON-LD `WebApplication`, contenu factuel structuré.
-- **SXO** : skip link, carte accessible clavier, états d'erreur explicites (`role="alert"`).
-- **Sécurité** : en-têtes OWASP dans `next.config.mjs`, `robots: noindex` (outil interne).
+## Failure modes & mitigations
 
-## Sécurité & conformité
+- **Data source outage** (Sentinel delayed/unavailable):
+  - Skip run, log warning, retry on next schedule.
+- **Cloud removal failure** (model error, bad input):
+  - Mark scene as invalid, do not propagate to downstream steps.
+- **Model drift** (predictions degrade over time):
+  - Periodic re-validation against ground truth; retrain or recalibrate as needed.
+- **Alert fatigue** (too many false positives):
+  - Tune thresholds, add hysteresis, require multi-scene confirmation.
 
-- Secrets en variables d'environnement uniquement (`.env` jamais commité, `.gitignore`).
-- API : CORS restreint, erreurs RFC 7807, pas de stack trace exposée.
-- Conteneur API non-root (Dockerfile), healthchecks dans docker-compose.
-- Données Copernicus libres ; traitement local compatible Loi 25.
+---
+
+## Extension points
+
+- Add more indices (EVI, SAVI, water indices) and multi-sensor fusion (e.g., Landsat).
+- Introduce a proper workflow orchestrator (e.g., Prefect, Airflow) for complex pipelines.
+- Add role-based access control and multi-tenant support if exposing as a service.
+- Integrate with notification channels (email, SMS, webhooks) for alert delivery.
